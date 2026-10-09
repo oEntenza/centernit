@@ -1,0 +1,6 @@
+# configurações locais do editor/pré-visualização
+.claude/
+# pacote gerado para envio, não faz parte do site
+*.zip
+# proposta comercial e roteiro de venda (têm valores, não podem ir para o GitHub Pages)
+proposta/
