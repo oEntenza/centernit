@@ -895,6 +895,67 @@
       if (b) setFilter(b.dataset.group);
     });
 
+    // catálogo recolhido: mostra a 1ª fileira e uma espiada na 2ª, com opção de expandir
+    const clip = $('#catalogClip');
+    const moreBtn = $('#catalogMore');
+    const moreLabel = $('.catalog-more-label', moreBtn);
+    let expanded = false;
+    const visibleCards = () => $$('.p-card', grid).filter((c) => !c.hidden);
+    const layoutCollapse = () => {
+      const cards = visibleCards();
+      moreBtn.setAttribute('aria-expanded', String(expanded));
+      if (expanded) {
+        cards.forEach((c) => { c.inert = false; });
+        moreLabel.textContent = 'Mostrar menos';
+        return;
+      }
+      const top0 = cards.length ? cards[0].offsetTop : 0;
+      const second = cards.find((c) => c.offsetTop > top0 + 4);
+      if (!second) {
+        clip.style.maxHeight = 'none';
+        clip.classList.remove('is-collapsed');
+        moreBtn.hidden = true;
+        cards.forEach((c) => { c.inert = false; });
+        return;
+      }
+      clip.style.maxHeight = `${second.offsetTop + Math.min(150, Math.round(second.offsetHeight * 0.3))}px`;
+      clip.classList.add('is-collapsed');
+      moreBtn.hidden = false;
+      cards.forEach((c) => { c.inert = c.offsetTop > top0 + 4; });
+      moreLabel.textContent = `Ver todos os ${cards.length} produtos`;
+    };
+    const expand = () => {
+      expanded = true;
+      clip.style.maxHeight = `${clip.scrollHeight}px`;
+      clip.classList.remove('is-collapsed');
+      setTimeout(() => { if (expanded) clip.style.maxHeight = 'none'; }, reduceMotion ? 0 : 750);
+      layoutCollapse();
+    };
+    moreBtn.addEventListener('click', () => {
+      if (!expanded) { expand(); return; }
+      // recolhe na hora e mantém o botão no mesmo ponto da tela (debaixo do dedo)
+      const before = moreBtn.getBoundingClientRect().top;
+      clip.style.transition = 'none';
+      expanded = false;
+      layoutCollapse();
+      void clip.offsetHeight;
+      clip.style.transition = '';
+      scrollBy({ top: moreBtn.getBoundingClientRect().top - before, behavior: 'instant' });
+    });
+    // usado pela busca: abre na hora para a rolagem até o card já encontrar a página inteira
+    window.__expandCatalog = () => {
+      if (expanded) return;
+      expanded = true;
+      clip.style.maxHeight = 'none';
+      clip.classList.remove('is-collapsed');
+      layoutCollapse();
+    };
+    let collapseRaf = 0;
+    const relayout = () => { cancelAnimationFrame(collapseRaf); collapseRaf = requestAnimationFrame(layoutCollapse); };
+    addEventListener('resize', relayout);
+    document.fonts && document.fonts.ready.then(relayout);
+    layoutCollapse();
+
     window.__setFilter = setFilter;
     function setFilter(group, opts = {}) {
       currentFilter = group;
@@ -907,6 +968,7 @@
       const cards = $$('.p-card', grid);
       const first = new Map(cards.map((c) => [c, c.hidden ? null : c.getBoundingClientRect()]));
       cards.forEach((c) => { c.hidden = !(group === 'all' || c.dataset.group === group); });
+      layoutCollapse();
       if (reduceMotion || opts.instant) return;
       cards.forEach((c) => {
         if (c.hidden) return;
@@ -968,6 +1030,7 @@
     if (!x) return;
     if (currentFilter !== 'all' && currentFilter !== x.family.group) window.__setFilter('all', { instant: true });
     const card = $(`.p-card[data-family="${x.family.id}"]`);
+    if (card.inert) window.__expandCatalog();
     selectVariant(card, sku);
     card.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
     card.classList.remove('is-highlight');

@@ -574,6 +574,19 @@ kbd {
 }
 
 .catalog-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); }
+/* catálogo recolhido: 1ª fileira + uma espiada na 2ª */
+.catalog-clip { position: relative; overflow: hidden; padding: 10px 12px 0; margin: -10px -12px 0; transition: max-height .75s var(--ease-out); }
+.catalog-clip::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 150px; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 82%); opacity: 0; transition: opacity .4s;
+}
+.catalog-clip.is-collapsed::after { opacity: 1; }
+.catalog-more-wrap { position: relative; z-index: 1; display: flex; justify-content: center; margin-top: 8px; }
+.catalog-more { background: var(--ink); color: #fff; box-shadow: var(--shadow); }
+.catalog-more:hover { background: var(--red); }
+.catalog-more .ico { transform: rotate(90deg); transition: transform .4s var(--ease); }
+.catalog-more[aria-expanded="true"] .ico { transform: rotate(-90deg); }
+.catalog-more[hidden] { display: none; }
 .p-card {
   position: relative; display: flex; flex-direction: column; border-radius: var(--radius); background: #fff;
   border: 1px solid var(--line); overflow: hidden; transition: box-shadow .35s var(--ease), border-color .3s, transform .35s var(--ease);

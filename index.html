@@ -509,7 +509,15 @@
       </div>
     </div>
 
-    <div class="catalog-grid" id="catalogGrid" aria-live="polite"></div>
+    <div class="catalog-clip" id="catalogClip">
+      <div class="catalog-grid" id="catalogGrid" aria-live="polite"></div>
+    </div>
+    <div class="catalog-more-wrap">
+      <button class="btn catalog-more" id="catalogMore" type="button" aria-expanded="false" aria-controls="catalogClip" hidden>
+        <span class="catalog-more-label">Ver todos os produtos</span>
+        <svg class="ico"><use href="#i-chev-r"/></svg>
+      </button>
+    </div>
 
     <p class="catalog-note">Imagens ilustrativas. Medidas em metros (comprimento × largura). Preços e disponibilidade sob consulta.</p>
   </div>
